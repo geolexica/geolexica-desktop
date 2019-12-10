@@ -6,6 +6,7 @@ import React, { useState, useEffect, useContext } from 'react';
 
 import { Position, Tooltip, NonIdealState, Button, Spinner, Icon, InputGroup } from '@blueprintjs/core';
 
+import { RemoteStorageStatus } from 'sse/storage/main/remote';
 import { LangConfigContext } from 'sse/localizer/renderer';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 import { request } from 'sse/api/renderer';
@@ -28,29 +29,42 @@ export const Home: React.FC<{}> = function () {
   const [query, setQuery] = useState(undefined as undefined | string);
 
   async function reloadConcepts() {
+    setLoading(true);
+    const result = await request<{ items: Concept[], total: number }>(
+      'search-concepts',
+      { query });
+    setLoading(false);
+    updateConcepts(result.items);
+    updateTotal(result.total);
+  }
+
+  async function fetchQuery() {
     await lock.acquire(SINGLETON_LOCK, async function () {
-      setLoading(true);
-      const result = await request<{ items: Concept[], total: number }>(
-        'search-concepts',
-        { query });
-      setLoading(false);
-      updateConcepts(result.items);
-      updateTotal(result.total);
+      await reloadConcepts();
     });
+  }
+
+  function handleStorageStatus(evt: any, status: Partial<RemoteStorageStatus>) {
+    if (status.statusRelativeToLocal === 'updated') {
+      setLoading(false);
+      reloadConcepts();
+    }
   }
 
   useEffect(() => {
     reloadConcepts();
     ipcRenderer.once('app-loaded', reloadConcepts);
     ipcRenderer.on('concepts-changes', reloadConcepts);
+    ipcRenderer.on('remote-storage-status', handleStorageStatus);
     return function cleanup() {
       ipcRenderer.removeListener('app-loaded', reloadConcepts);
       ipcRenderer.removeListener('concepts-changes', reloadConcepts);
+      ipcRenderer.removeListener('remote-storage-status', handleStorageStatus);
     };
   }, []);
 
   useEffect(() => {
-    reloadConcepts();
+    fetchQuery();
   }, [query]);
 
   const maybeSpinner = loading ? <Spinner size={Icon.SIZE_STANDARD} /> : undefined;
