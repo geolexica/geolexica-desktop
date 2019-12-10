@@ -73,8 +73,27 @@ export const Home: React.FC<{}> = function () {
     <div className={styles.homeBase}>
       <PaneHeader align="right">
         ISO/TC 211 Geolexica Concepts
+
         &emsp;
+
         <LangSelector />
+
+        &emsp;
+
+        <div className={styles.status}>
+
+          <DataBarButton
+              onClick={() => openWindow('settings')}
+              title="Settings">
+            <Icon icon="settings" />
+          </DataBarButton>
+
+          <StorageStatus
+            tooltipPosition={Position.BOTTOM}
+            iconClassName={styles.storageStatusIcon} />
+
+        </div>
+
       </PaneHeader>
 
       <div className={styles.searchControls}>
@@ -109,18 +128,6 @@ export const Home: React.FC<{}> = function () {
               title="Nothing to display"
               icon="zoom-out" />}
       </main>
-
-      <footer className={styles.actions}>
-        <DataBarButton
-            onClick={() => openWindow('settings')}
-            title="Settings">
-          <Icon icon="settings" />
-        </DataBarButton>
-
-        <StorageStatus
-          tooltipPosition={Position.TOP}
-          iconClassName={styles.storageStatusIcon} />
-      </footer>
     </div>
   );
 };

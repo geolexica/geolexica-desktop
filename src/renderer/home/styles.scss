@@ -84,3 +84,30 @@
     box-shadow: none !important;
   }
 }
+
+
+$sidebarSide: $pt-navbar-height;
+
+:local .dataBarButtonWithTooltip {
+  display: inline-block;
+
+  :global .bp3-button {
+    width: $sidebarSide;
+    height: $sidebarSide;
+    padding: 0 !important;
+  }
+}
+
+:local .status {
+  height: $sidebarSide;
+  display: inline-flex;
+
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+}
+
+:local .storageStatusIcon {
+  width: $sidebarSide;
+  height: $sidebarSide;
+}
