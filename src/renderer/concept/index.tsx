@@ -4,7 +4,7 @@ import { debounce } from 'throttle-debounce';
 
 import React, { useContext, useState, useEffect } from 'react';
 
-import { H2, Tooltip, Button, EditableText, Position } from '@blueprintjs/core';
+import { H2, Tooltip, Button, EditableText, Position, Checkbox, Menu, Popover } from '@blueprintjs/core';
 import { Toaster } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
@@ -102,6 +102,27 @@ export const Concept: React.FC<{ id: string }> = function ({ id }) {
     fetchConcept();
   }, []);
 
+  function togglePreferredStatus() {
+    if (concept) {
+      var newConcept = {
+        ...concept,
+        [lang.selected]: {
+          ...concept[lang.selected],
+        },
+      } as ConceptModel;
+
+      const preferred = newConcept[lang.selected].classification === 'preferred';
+
+      if (preferred) {
+        delete newConcept[lang.selected].classification;
+      } else {
+        newConcept[lang.selected].classification = 'preferred';
+      }
+
+      updateConcept(newConcept);
+    }
+  }
+
   function updateTerm(val: string) {
     if (concept) {
       var newConcept = {
@@ -127,6 +148,19 @@ export const Concept: React.FC<{ id: string }> = function ({ id }) {
         [lang.selected]: {
           ...concept[lang.selected],
           definition: val,
+        },
+      } as ConceptModel;
+      updateConcept(newConcept);
+    }
+  }
+
+  function updateEntryStatus(val: string) {
+    if (concept) {
+      const newConcept = {
+        ...concept,
+        [lang.selected]: {
+          ...concept[lang.selected],
+          entry_status: val,
         },
       } as ConceptModel;
       updateConcept(newConcept);
@@ -229,6 +263,22 @@ export const Concept: React.FC<{ id: string }> = function ({ id }) {
         </Tooltip>
       </div>
 
+      <div className={styles.preferredStatus}>
+        <Checkbox
+          checked={(term.classification || '') === 'preferred'}
+          label="Is preferred"
+          onChange={() => togglePreferredStatus()} />
+      </div>
+
+      <div className={styles.entryStatus}>
+        <span>Entry status</span>
+        <Popover content={<EntryStatusMenu onSelect={(status: string) => updateEntryStatus(status)}/>} position={Position.RIGHT_TOP}>
+          <Button
+            text={term.entry_status || 'Choose…'}
+            intent={term.entry_status ? undefined : 'primary'} />
+        </Popover>
+      </div>
+
       <div className={styles.conceptDefinition}>
         <EditableText
           placeholder="Edit definition…"
@@ -295,4 +345,20 @@ const Comment: React.FC<{ content: string }> = function ({ content }) {
   return <div className={styles.comment}>
     {content}
   </div>
+}
+
+
+const ENTRY_STATUSES = [
+  'valid',
+  'superseded',
+  'retired',
+]
+
+
+const EntryStatusMenu: React.FC<{ onSelect: (status: string) => void }> = function ({ onSelect }) {
+  return (
+    <Menu>
+      {ENTRY_STATUSES.map(status => <Menu.Item onClick={() => onSelect(status)} text={status} />)}
+    </Menu>
+  );
 }
