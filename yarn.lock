@@ -7262,8 +7262,9 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-sse@../../SSE/sse-elements/dist:
-  version "0.2.6"
+"sse@https://github.com/riboseinc/sse-elements#sse-elements-v0.3.0-beta1-gitpkg":
+  version "0.3.0-beta1"
+  resolved "https://github.com/riboseinc/sse-elements#da0391a90db20bac7b5593c24499a436001a8b6d"
   dependencies:
     "@isomorphic-git/lightning-fs" "^3.3.3"
     fs-extra "^8.1.0"

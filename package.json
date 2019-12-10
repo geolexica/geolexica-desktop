@@ -56,7 +56,7 @@
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "source-map-support": "^0.5.16",
-    "sse": "../../SSE/sse-elements/dist",
+    "sse": "https://github.com/riboseinc/sse-elements#sse-elements-v0.3.0-beta1-gitpkg",
     "throttle-debounce": "^2.1.0"
   },
   "resolutions": {
