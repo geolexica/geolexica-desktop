@@ -7,6 +7,7 @@ import { DataSynchronizer } from 'sse/storage/renderer/data-synchronizer';
 
 import { Home } from './home';
 import { Concept } from './concept';
+import { BatchCommit } from './widgets/batch-commit';
 
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
 import '!style-loader!css-loader!./normalize.css';
@@ -38,6 +39,9 @@ const App: React.FC<{}> = function () {
     component = <DataSynchronizer
       upstreamURL={searchParams.get('upstreamURL') || ''}
       inPreLaunchSetup={searchParams.get('inPreLaunchSetup') === '1'} />;
+
+  } else if (searchParams.get('c') === 'batchCommit') {
+    component = <BatchCommit />;
 
   } else {
     component = <NonIdealState icon="error" title="Unknown component requested" />;
