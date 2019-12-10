@@ -49,7 +49,20 @@ const App: React.FC<{}> = function () {
   }
 
   const [langConfig, setLangConfig] = useState({
-    available: { eng: 'English', zho: 'Chinese', rus: 'Russian', msa: 'Malay', kor: 'Korean' },
+    available: {
+      eng: 'English',
+      chn: 'Chinese',
+      rus: 'Russian',
+      pol: 'Polish',
+      msa: 'Malay',
+      kor: 'Korean',
+      ger: 'German',
+      spa: 'Spanish',
+      swe: 'Swedish',
+      fra: 'French',
+      fin: 'Finnish',
+      dur: 'Dutch',
+    },
     default: 'eng',
     selected: selectedLang || 'eng',
     select: (langId: string) => {

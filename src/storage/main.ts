@@ -12,10 +12,17 @@ type Concept = Storage['concepts']
 
 const SUPPORTED_LANGUAGES = [
   'eng',
-  'zho',
+  'chn',
   'rus',
+  'pol',
   'msa',
   'kor',
+  'ger',
+  'spa',
+  'swe',
+  'fra',
+  'fin',
+  'dur',
 ]
 
 
