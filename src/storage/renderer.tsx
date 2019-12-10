@@ -64,6 +64,7 @@ export const StorageContextProvider: React.FC<{}> = function ({ children }) {
         const results = await Promise.all([
           await request<string[]>('storage-read-modified-in-concepts'),
         ]);
+
         modified = {
           concepts: results[0],
         };
