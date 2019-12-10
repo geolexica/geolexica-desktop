@@ -8,6 +8,7 @@ import { DataSynchronizer } from 'sse/storage/renderer/data-synchronizer';
 import { Home } from './home';
 import { Concept } from './concept';
 import { BatchCommit } from './widgets/batch-commit';
+import { StorageContextProvider } from 'storage/renderer';
 
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
 import '!style-loader!css-loader!./normalize.css';
@@ -58,7 +59,9 @@ const App: React.FC<{}> = function () {
 
   return (
     <LangConfigContext.Provider value={langConfig}>
-      {component}
+      <StorageContextProvider>
+        {component}
+      </StorageContextProvider>
     </LangConfigContext.Provider>
   );
 };
