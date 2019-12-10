@@ -1,0 +1,119 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+:local .conceptIdHighlight {
+  color: $pt-text-color;
+}
+
+:local .conceptBase {
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  flex-flow: column nowrap;
+  background: $pt-app-background-color;
+}
+
+:local .conceptHeader {
+  color: $pt-text-color-muted !important;
+  margin-bottom: 0 !important;
+}
+
+
+$leftPadding: 2rem;
+
+:local .conceptHeader,
+:local .authSource,
+:local .conceptDefinition {
+  :global .bp3-editable-text {
+    padding: .5rem 1rem .5rem $leftPadding;
+    width: calc(100% - 1rem);
+    border-radius: 0 !important;
+  }
+  :global .bp3-editable-text-editing {
+    background: white;
+  }
+}
+
+:local .conceptComments {
+  padding: .5rem 1rem .5rem $leftPadding;
+
+  .conceptCommentsHeader {
+    padding-left: 0;
+  }
+
+  .commentList {
+    max-height: 30vh;
+    overflow-y: auto;
+
+    margin-left: -.5rem;
+    padding: .5rem;
+
+    display: flex;
+    flex-flow: column nowrap;
+
+    .comment {
+      margin-left: -$pt-border-radius;
+      background: white;
+      box-shadow: $pt-elevation-shadow-1;
+      padding: 1rem;
+      margin-right: 1rem;
+
+      &:first-child {
+        border-radius: $pt-border-radius * 4 $pt-border-radius * 4 0 0; 
+        margin-bottom: .5rem;
+
+        // New comment field
+        align-self: stretch;
+
+        padding: 0;
+        > :first-child {
+          padding: 1rem;
+          width: 100%;
+        }
+      }
+
+      &:last-child {
+        border-radius: 0 0 $pt-border-radius * 4 $pt-border-radius * 4; 
+      }
+
+      .commentAddButton {
+        border-radius: 0;
+      }
+    }
+  }
+}
+
+:local .conceptDefinition {
+  font-size: 120%;
+  flex: 1;
+
+  :global .bp3-editable-text {
+    height: 100% !important;
+  }
+}
+
+:local .authSource {
+  margin-bottom: 2rem !important;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+
+  > :first-child {
+    // Text field
+    flex: 1;
+    margin-right: 1rem;
+  }
+  > :last-child {
+    // Button
+    margin-right: 1rem;
+  }
+}
+
+:local .actions {
+  flex-shrink: 0;
+  flex-grow: 0;
+  padding: 1rem 1rem;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: flex-end;
+}

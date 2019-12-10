@@ -1,0 +1,86 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+:local .homeBase {
+  height: 100vh;
+  display: flex;
+  flex-flow: column nowrap;
+  background: $pt-app-background-color;
+}
+
+:local .searchControls {
+  flex-grow: 0;
+  flex-shrink: 0;
+
+  input {
+    padding: 0 1rem;
+    border-radius: 0;
+  }
+
+  :global input:not(.bp3-active):not(:focus) {
+    box-shadow: none !important;
+  }
+}
+
+:local .conceptCollection {
+  flex: 1;
+  overflow-y: auto;
+}
+
+:local .conceptCollectionTotal {
+  color: $pt-text-color-muted;
+  margin-top: .5rem;
+  padding: 0 1rem;
+}
+
+:local .conceptItem {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  padding: 0 1rem;
+
+  &:first-child {
+    margin-top: 1.5rem;
+  }
+
+  :local .title {
+    flex: 1;
+    font-weight: bold;
+    a {
+      color: inherit;
+      transition: color .2s linear;
+    }
+  }
+
+  :local .icons {
+    > * {
+      transform: scale(0.8);
+      opacity: 0.2;
+      margin-left: .5rem;
+      transition: opacity .2s linear;
+      font-size: $pt-font-size-small;
+
+      &.activeIcon {
+        opacity: 0.6;
+      }
+    }
+  }
+
+  &:hover {
+    cursor: pointer;
+
+    :local .title a {
+      text-decoration: underline;
+      color: $pt-link-color;
+    }
+    :local .icons > * {
+      opacity: 0.8;
+    }
+  }
+}
+
+:local .actions {
+  > :first-child {
+    border-radius: 0;
+    box-shadow: none !important;
+  }
+}

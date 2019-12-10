@@ -1,0 +1,48 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+:local .base {
+  height: 100%;
+  display: flex;
+  padding: 1rem;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+:local .intro {
+  align-self: center;
+  -webkit-app-region: drag;
+
+  flex: 1;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  margin-left: -40px;
+
+  .logo {
+    height: auto;
+    width: 40vw;
+    display: block;
+    position: relative;
+    top: -6px;
+    margin-right: 1rem;
+  }
+}
+
+:local .welcomeMessage {
+  color: $pt-text-color-disabled !important;
+}
+
+:local .repoConfig {
+  align-self: stretch;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+
+  :global .confirm-button {
+    align-self: flex-end;
+  }
+}
