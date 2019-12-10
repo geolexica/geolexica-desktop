@@ -73,7 +73,7 @@ const HOME_WINDOW_OPTS: WindowOpenerParams = {
   component: 'home',
   title: 'ISO/TC 211 Geolexica Desktop',
   frameless: true,
-  dimensions: { width: 800, height: 500, minWidth: 800, minHeight: 500 },
+  dimensions: { width: 580, height: 500, minWidth: 580, minHeight: 500 },
 };
 
 const HELP_WINDOW_OPTS: WindowOpenerParams = {
