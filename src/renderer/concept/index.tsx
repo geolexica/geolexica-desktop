@@ -1,67 +1,99 @@
-import { remote } from 'electron';
+import AsyncLock from 'async-lock';
+import { remote, ipcRenderer } from 'electron';
+import { debounce } from 'throttle-debounce';
 
 import React, { useContext, useState, useEffect } from 'react';
 
 import { H2, Tooltip, Button, EditableText, Position } from '@blueprintjs/core';
+import { Toaster } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
-import { request } from 'sse/api/renderer';
+import { request, notifyAllWindows } from 'sse/api/renderer';
 
+import { useModified } from 'storage/renderer';
+import { ObjectStorageStatus } from 'renderer/widgets/change-status';
 import { LangSelector } from 'renderer/lang';
 import { Concept as ConceptModel } from 'models/concept';
 
 import styles from './styles.scss';
 
 
+const operationLock = new AsyncLock();
+
+var objectUpdate: NodeJS.Timer;
+
+ 
+export const WindowToaster = Toaster.create({
+    className: "window-toaster",
+    position: Position.BOTTOM,
+});
+
+
 export const Concept: React.FC<{ id: string }> = function ({ id }) {
-  const [concept, updateConcept] = useState(undefined as ConceptModel | undefined);
+  const [concept, _updateConcept] = useState(undefined as ConceptModel | undefined);
 
-  console.debug(id);
+  /* Issue change status */
 
-  console.debug(concept);
+  const modifiedConcepts = useModified().concepts;
+  const [haveSaved, setSaved] = useState(undefined as boolean | undefined);
+  const [hasUncommittedChanges, setHasUncommittedChanges] = useState(false);
 
-  const [loading, setLoading] = useState(true);
-  const [dirty, setDirty] = useState(false);
-
-  const [term, updateTerm] = useState('' as string);
-  const [definition, updateDefinition] = useState('' as string);
-  const [authSource, updateAuthSource] = useState('' as string);
-  const [comments, updateComments] = useState([] as string[]);
+  useEffect(() => {
+    const _hasUncommittedChanges = modifiedConcepts.indexOf(parseInt(id, 10)) >= 0;
+    setHasUncommittedChanges(_hasUncommittedChanges);
+  }, [modifiedConcepts]);
 
   const lang = useContext(LangConfigContext);
 
+
   async function fetchConcept() {
-    setLoading(true);
     const _concept = (await request<ConceptModel>('concept', { id })) as ConceptModel;
-    updateConcept(_concept);
-    setLoading(false);
+    _updateConcept(_concept);
   }
 
-  async function handleSaveClick() {
-    if (concept) {
-      setLoading(true);
+  async function _storageUpdateConcept(data: ConceptModel, commit?: true) {
+    await operationLock.acquire('update-issue', async () => {
+      clearTimeout(objectUpdate);
 
-      const newConcept = {
-        ...concept,
-        [lang.selected]: {
-          ...concept[lang.selected],
-          comments: comments,
-          term: term,
-          definition: definition,
-          authoritative_source: { link: authSource },
-        },
-      } as ConceptModel;
+      const updateResult = await request<{ modified: boolean }>
+        ('concept-update', { id: parseInt(id, 10), data, commit: commit });
 
-      if (lang.selected === lang.default) {
-        newConcept.term = term;
+      if (commit) {
+        await ipcRenderer.send('remote-storage-trigger-sync');
+      } else {
+        await ipcRenderer.send('remote-storage-trigger-uncommitted-check');
       }
 
-      await request<void>('concept', JSON.stringify({ id: id }), JSON.stringify({ newData: newConcept }));
+      objectUpdate = setTimeout(() => {
+        setHasUncommittedChanges(updateResult.modified);
+        setSaved(true);
+      }, 500);
+    });
+  }
+  const storageUpdateConcept = debounce(500, _storageUpdateConcept);
 
-      setDirty(false);
-      setLoading(false);
+  const term = (concept ? concept[lang.selected] : undefined) || {};
 
+
+  /* Update operations */
+
+  async function updateConcept(data: ConceptModel) {
+    setSaved(false);
+    _updateConcept(data);
+
+    await storageUpdateConcept(data);
+  }
+
+  async function handleCommitAndQuit() {
+    if (concept !== undefined) {
+      try {
+        await _storageUpdateConcept(concept, true);
+      } catch (e) {
+        WindowToaster.show({ intent: 'danger', message: "Failed to commit changes" });
+        return;
+      }
+      await notifyAllWindows('concepts-changed');
       remote.getCurrentWindow().close();
     }
   }
@@ -70,33 +102,93 @@ export const Concept: React.FC<{ id: string }> = function ({ id }) {
     fetchConcept();
   }, []);
 
-  useEffect(() => {
+  function updateTerm(val: string) {
     if (concept) {
-      const term = concept[lang.selected] || {};
-      updateComments(term.comments || []);
-      updateTerm(term.term || '');
-      updateDefinition(term.definition || '');
-      updateAuthSource((term.authoritative_source || {}).link || '');
-    }
-  }, [concept, lang.selected]);
+      var newConcept = {
+        ...concept,
+        [lang.selected]: {
+          ...concept[lang.selected],
+          term: val,
+        },
+      } as ConceptModel;
 
-  function handleNewComment(newComment: string) {
-    updateComments([ newComment, ...comments ]);
-    setDirty(true);
+      if (lang.selected === lang.default) {
+        newConcept.term = val;
+      }
+
+      updateConcept(newConcept);
+    }
+  }
+
+  function updateDefinition(val: string) {
+    if (concept) {
+      const newConcept = {
+        ...concept,
+        [lang.selected]: {
+          ...concept[lang.selected],
+          definition: val,
+        },
+      } as ConceptModel;
+      updateConcept(newConcept);
+    }
+  }
+
+  function updateAuthSource(val: string) {
+    if (concept) {
+      const newConcept = {
+        ...concept,
+        [lang.selected]: {
+          ...concept[lang.selected],
+          authoritative_source: { ...concept[lang.selected].authoritative_source, link: val },
+        },
+      } as ConceptModel;
+      updateConcept(newConcept);
+    }
+  }
+
+  function handleNewComment(val: string) {
+    if (concept) {
+      const newConcept = {
+        ...concept,
+        [lang.selected]: {
+          ...concept[lang.selected],
+          comments: [ val, ...(term.comments || []) ],
+        },
+      } as ConceptModel;
+      updateConcept(newConcept);
+    }
   }
 
   function handleCommentEdit(commentIdx: number, updatedComment: string) {
-    var newComments = [...comments];
-    newComments[commentIdx] = updatedComment;
-    updateComments(newComments);
-    setDirty(true);
+    if (concept) {
+      var newComments = [ ...(term.comments || []) ];
+      newComments[commentIdx] = updatedComment;
+
+      const newConcept = {
+        ...concept,
+        [lang.selected]: {
+          ...concept[lang.selected],
+          comments: newComments,
+        },
+      } as ConceptModel;
+      updateConcept(newConcept);
+    }
   }
 
   function handleCommentDeletion(commentIdx: number) {
-    var newComments = [...comments];
-    newComments.splice(commentIdx, 1);
-    updateComments(newComments);
-    setDirty(true);
+    if (concept) {
+      var newComments = [ ...(term.comments || []) ];
+      newComments.splice(commentIdx, 1);
+
+      const newConcept = {
+        ...concept,
+        [lang.selected]: {
+          ...concept[lang.selected],
+          comments: newComments,
+        },
+      } as ConceptModel;
+      updateConcept(newConcept);
+    }
   }
 
   return (
@@ -107,61 +199,56 @@ export const Concept: React.FC<{ id: string }> = function ({ id }) {
         <Tooltip position={Position.RIGHT_TOP} content="Concept IDs are set internally and cannot be changed"><span className={styles.conceptIdHighlight}>{id}</span></Tooltip>
         &emsp;
         <LangSelector />
+        &emsp;
+        <ObjectStorageStatus
+          haveSaved={haveSaved}
+          hasUncommittedChanges={hasUncommittedChanges}
+          onCommit={handleCommitAndQuit} />
       </PaneHeader>
 
       <H2 className={styles.conceptHeader}>
         <EditableText
           placeholder="Edit term…"
-          intent={term.trim() === '' ? "danger" : undefined}
-          onChange={(val: string) => { setDirty(true); updateTerm(val) }}
-          value={term} />
+          intent={(term.term || '').trim() === '' ? "danger" : undefined}
+          onChange={(val: string) => { updateTerm(val) }}
+          value={term.term || ''} />
       </H2>
 
       <div className={styles.authSource}>
         <EditableText
           placeholder="Edit authoritative source…"
-          intent={authSource.trim() === '' ? "danger" : undefined}
-          onChange={(val: string) => { setDirty(true); updateAuthSource(val); }}
-          value={authSource}/>
+          intent={((term.authoritative_source || {}).link || '').trim() === '' ? "danger" : undefined}
+          onChange={(val: string) => { updateAuthSource(val); }}
+          value={(term.authoritative_source || {}).link || ''} />
         <Tooltip position={Position.RIGHT_TOP} content="Open authoritative source in a new window">
           <Button
             minimal={true}
             small={true}
             intent="primary"
-            onClick={() => require('electron').shell.openExternal(authSource)}>Open…</Button>
+            onClick={() => require('electron').shell.openExternal((term.authoritative_source || {}).link || '')}>Open…</Button>
         </Tooltip>
       </div>
 
       <div className={styles.conceptDefinition}>
         <EditableText
           placeholder="Edit definition…"
-          intent={definition.trim() === '' ? "danger" : undefined}
+          intent={(term.definition || '').trim() === '' ? "danger" : undefined}
           multiline={true}
-          onChange={(val: string) => { setDirty(true); updateDefinition(val); }}
-          value={definition}/>
+          onChange={(val: string) => { updateDefinition(val); }}
+          value={term.definition || ''} />
       </div>
 
       <div className={styles.conceptComments}>
         <PaneHeader align="left" className={styles.conceptCommentsHeader}>
-          {comments.length} comment{(!comments.length || comments.length > 1) ? 's' : null}
+          {(term.comments || []).length} comment{(!(term.comments || []).length || (term.comments || []).length > 1) ? 's' : null}
         </PaneHeader>
 
         <Comments
-          comments={comments}
+          comments={term.comments || []}
           onCreate={handleNewComment}
           onUpdate={handleCommentEdit}
           onDelete={handleCommentDeletion} />
       </div>
-
-      <footer className={styles.actions}>
-        <Button
-          disabled={loading || !dirty || term.trim() === ''}
-          large={true}
-          minimal={false}
-          intent="primary"
-          onClick={handleSaveClick}
-          icon="tick">Save and close</Button>
-      </footer>
     </div>
   );
 };
