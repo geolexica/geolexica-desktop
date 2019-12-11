@@ -13,6 +13,7 @@ import { request, notifyAllWindows } from 'sse/api/renderer';
 
 import { useModified } from 'storage/renderer';
 import { ObjectStorageStatus } from 'renderer/widgets/change-status';
+import { DateStamp } from 'renderer/widgets/dates';
 import { LangSelector } from 'renderer/lang';
 import { Concept as ConceptModel } from 'models/concept';
 
@@ -302,6 +303,12 @@ export const Concept: React.FC<{ id: string }> = function ({ id }) {
           value={term.definition || ''} />
       </div>
 
+      <div className={styles.conceptReview}>
+        {term.review_status
+          ? <ConceptReview review={term} />
+          : null}
+      </div>
+
       <div className={styles.conceptComments}>
         <PaneHeader align="left" className={styles.conceptCommentsHeader}>
           {(term.comments || []).length} comment{(!(term.comments || []).length || (term.comments || []).length > 1) ? 's' : null}
@@ -374,5 +381,35 @@ const EntryStatusMenu: React.FC<{ onSelect: (status: string) => void }> = functi
     <Menu>
       {ENTRY_STATUSES.map(status => <Menu.Item onClick={() => onSelect(status)} text={status} />)}
     </Menu>
+  );
+}
+
+
+type Review = {
+  review_date: Date,
+  review_status: 'final' | 'pending',
+  review_type: 'retirement' | 'supercession',
+  review_decision_date: Date,
+  review_decision: string,
+  review_decision_event: string,
+  review_decision_notes: string,
+}
+
+
+const ConceptReview: React.FC<{ review: Review }> = function ({ review }) {
+  return (
+    <div className={styles.review}>
+      <div className={styles.reviewStatus}>
+        Review status: <strong>{review.review_status || '(unknown status)'}</strong>
+        {review.review_type ? <> for <strong>{review.review_type}</strong></> : null}
+        {review.review_date ? <> since <DateStamp date={review.review_date} /></> : null}
+      </div>
+      {review.review_decision
+        ? <div className={styles.reviewDecision}>
+            Decision: <strong>{review.review_decision}</strong>
+            {review.review_decision_date ? <> as of <DateStamp date={review.review_decision_date} /></> : null}
+          </div>
+        : null}
+    </div>
   );
 }

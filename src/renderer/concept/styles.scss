@@ -34,6 +34,7 @@ $leftPadding: 2rem;
 }
 
 :local .preferredStatus,
+:local .review,
 :local .entryStatus {
   padding: 0 1rem 0 2rem;
   margin: 0 0 .5rem 0;
@@ -48,6 +49,13 @@ $leftPadding: 2rem;
 :local .authSourceRef {
   display: flex;
   flex-flow: row nowrap;
+}
+
+:local .review {
+  .reviewStatus {
+  }
+  .reviewDecision {
+  }
 }
 
 :local .conceptComments {
