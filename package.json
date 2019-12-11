@@ -1,6 +1,6 @@
 {
   "name": "isotc211-geolexica-desktop",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Cross-platform graphical terminal for collaborative editing of ISO/TC 211 Geolexica terminology database",
   "main": "index.js",
   "repository": "git@github.com:ISO-TC211/geolexica-desktop.git",
@@ -56,7 +56,7 @@
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "source-map-support": "^0.5.16",
-    "sse": "https://github.com/riboseinc/sse-elements#sse-elements-v0.3.0-beta1-gitpkg",
+    "sse": "https://github.com/riboseinc/sse-elements#sse-elements-v0.3.0-beta2-gitpkg",
     "throttle-debounce": "^2.1.0"
   },
   "resolutions": {
