@@ -4,7 +4,7 @@ import { openWindow } from 'sse/api/renderer';
 
 import React, { useState, useEffect, useContext } from 'react';
 
-import { Position, Tooltip, NonIdealState, Button, Spinner, Icon, InputGroup } from '@blueprintjs/core';
+import { Text, Position, Tooltip, NonIdealState, Button, Spinner, Icon, InputGroup } from '@blueprintjs/core';
 
 import { RemoteStorageStatus } from 'sse/storage/main/remote';
 import { LangConfigContext } from 'sse/localizer/renderer';
@@ -137,14 +137,19 @@ const ConceptItem: React.FC<{ concept: Concept }> = function ({ concept }) {
   const lang = useContext(LangConfigContext);
   const term = concept[lang.selected];
 
-  let hasComments, hasNotes, hasExamples: boolean;
+  let hasComments, hasNotes, hasExamples, isPreferred: boolean;
+  let entryStatus: string;
 
   if (term) {
     hasComments = (term.comments || []).length > 0;
+    isPreferred = term.classification === 'preferred';
+    entryStatus = term.entry_status;
     hasNotes = (term.notes || []).length > 0;
     hasExamples = (term.examples || []).length > 0;
   } else {
     hasComments = false;
+    isPreferred = false;
+    entryStatus = '';
     hasNotes = false;
     hasExamples = false;
   }
@@ -157,6 +162,11 @@ const ConceptItem: React.FC<{ concept: Concept }> = function ({ concept }) {
       <div className={styles.icons}>
         {term
           ? <>
+              <Text>{entryStatus}</Text>
+              <Icon icon="tick-circle"
+                htmlTitle={isPreferred ? "Is preferred for select language" : undefined}
+                className={isPreferred ? styles.activeIcon : undefined}
+                intent={isPreferred ? "primary" : undefined} />
               <Icon icon="comment"
                 htmlTitle={hasComments ? "Has comments" : undefined}
                 className={hasComments ? styles.activeIcon : undefined}
@@ -165,10 +175,6 @@ const ConceptItem: React.FC<{ concept: Concept }> = function ({ concept }) {
                 htmlTitle={hasNotes ? "Has notes" : undefined}
                 className={hasNotes ? styles.activeIcon : undefined}
                 intent={hasNotes ? "primary" : undefined} />
-              <Icon icon="citation"
-                htmlTitle={hasExamples ? "Has examples" : undefined}
-                className={hasExamples ? styles.activeIcon : undefined}
-                intent={hasExamples ? "primary" : undefined} />
             </>
           : <><span>missing term</span> <Icon icon="warning-sign" /></>}
       </div>

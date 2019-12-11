@@ -59,6 +59,10 @@
       transition: opacity .2s linear;
       font-size: $pt-font-size-small;
 
+      &:first-child {
+        display: inline;
+      }
+
       &.activeIcon {
         opacity: 0.6;
       }
