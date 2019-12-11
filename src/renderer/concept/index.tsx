@@ -250,10 +250,24 @@ export const Concept: React.FC<{ id: string }> = function ({ id }) {
 
       <div className={styles.authSource}>
         <EditableText
-          placeholder="Edit authoritative source…"
+          placeholder="Edit authoritative source URL…"
           intent={((term.authoritative_source || {}).link || '').trim() === '' ? "danger" : undefined}
           onChange={(val: string) => { updateAuthSource(val); }}
           value={(term.authoritative_source || {}).link || ''} />
+
+        <div className={styles.authSourceRef}>
+          <EditableText
+            placeholder="Edit source reference…"
+            intent={((term.authoritative_source || {}).ref || '').trim() === '' ? "danger" : undefined}
+            onChange={(val: string) => { updateAuthSource(val); }}
+            value={(term.authoritative_source || {}).ref || ''} />
+          <EditableText
+            placeholder="Edit source clause…"
+            intent={((term.authoritative_source || {}).clause || '').trim() === '' ? "danger" : undefined}
+            onChange={(val: string) => { updateAuthSource(val); }}
+            value={(term.authoritative_source || {}).clause || ''} />
+        </div>
+
         <Tooltip position={Position.RIGHT_TOP} content="Open authoritative source in a new window">
           <Button
             minimal={true}

@@ -45,6 +45,11 @@ $leftPadding: 2rem;
   }
 }
 
+:local .authSourceRef {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
 :local .conceptComments {
   padding: .5rem 1rem .5rem $leftPadding;
 
