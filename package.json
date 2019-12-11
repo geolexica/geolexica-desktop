@@ -1,6 +1,6 @@
 {
   "name": "isotc211-geolexica-desktop",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Cross-platform graphical terminal for collaborative editing of ISO/TC 211 Geolexica terminology database",
   "main": "index.js",
   "repository": "git@github.com:ISO-TC211/geolexica-desktop.git",
