@@ -137,7 +137,7 @@ const ConceptItem: React.FC<{ concept: Concept }> = function ({ concept }) {
   const lang = useContext(LangConfigContext);
   const term = concept[lang.selected];
 
-  let hasComments, hasNotes, hasExamples, isPreferred: boolean;
+  let hasComments, hasNotes, isPreferred: boolean;
   let entryStatus: string;
 
   if (term) {
@@ -145,13 +145,11 @@ const ConceptItem: React.FC<{ concept: Concept }> = function ({ concept }) {
     isPreferred = term.classification === 'preferred';
     entryStatus = term.entry_status;
     hasNotes = (term.notes || []).length > 0;
-    hasExamples = (term.examples || []).length > 0;
   } else {
     hasComments = false;
     isPreferred = false;
     entryStatus = '';
     hasNotes = false;
-    hasExamples = false;
   }
 
   return (
