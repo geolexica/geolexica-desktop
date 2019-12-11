@@ -1,4 +1,4 @@
-# ISo/TC 211 Geolexica Desktop
+# ISO/TC 211 Geolexica Desktop
 
 A cross-platform app for managing ISO/TC 211 Geolexica terminology database.
 
