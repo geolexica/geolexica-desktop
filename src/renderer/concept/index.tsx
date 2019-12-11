@@ -226,6 +226,51 @@ export const Concept: React.FC<{ id: string }> = function ({ id }) {
     }
   }
 
+  function handleNewNote(val: string) {
+    if (concept) {
+      const newConcept = {
+        ...concept,
+        [lang.selected]: {
+          ...concept[lang.selected],
+          notes: [ val, ...(term.notes || []) ],
+        },
+      } as ConceptModel;
+      updateConcept(newConcept);
+    }
+  }
+
+  function handleNoteEdit(noteIdx: number, updatedNote: string) {
+    if (concept) {
+      var newNotes = [ ...(term.notes || []) ];
+      newNotes[noteIdx] = updatedNote;
+
+      const newConcept = {
+        ...concept,
+        [lang.selected]: {
+          ...concept[lang.selected],
+          notes: newNotes,
+        },
+      } as ConceptModel;
+      updateConcept(newConcept);
+    }
+  }
+
+  function handleNoteDeletion(noteIdx: number) {
+    if (concept) {
+      var newNotes = [ ...(term.notes || []) ];
+      newNotes.splice(noteIdx, 1);
+
+      const newConcept = {
+        ...concept,
+        [lang.selected]: {
+          ...concept[lang.selected],
+          notes: newNotes,
+        },
+      } as ConceptModel;
+      updateConcept(newConcept);
+    }
+  }
+
   return (
     <div className={styles.conceptBase}>
       <PaneHeader align="right">
@@ -311,16 +356,32 @@ export const Concept: React.FC<{ id: string }> = function ({ id }) {
           : null}
       </div>
 
-      <div className={styles.conceptComments}>
-        <PaneHeader align="left" className={styles.conceptCommentsHeader}>
-          {(term.comments || []).length} comment{(!(term.comments || []).length || (term.comments || []).length > 1) ? 's' : null}
-        </PaneHeader>
+      <div className={styles.conceptNotesAndComments}>
+        <div className={styles.conceptComments}>
+          <PaneHeader align="left" className={styles.conceptCommentsHeader}>
+            {(term.comments || []).length} comment{(!(term.comments || []).length || (term.comments || []).length > 1) ? 's' : null}
+          </PaneHeader>
 
-        <Comments
-          comments={term.comments || []}
-          onCreate={handleNewComment}
-          onUpdate={handleCommentEdit}
-          onDelete={handleCommentDeletion} />
+          <Comments
+            comments={term.comments || []}
+            newObjectLabel="comment"
+            onCreate={handleNewComment}
+            onUpdate={handleCommentEdit}
+            onDelete={handleCommentDeletion} />
+        </div>
+
+        <div className={styles.conceptComments}>
+          <PaneHeader align="left" className={styles.conceptCommentsHeader}>
+            {(term.notes || []).length} note{(!(term.notes || []).length || (term.notes || []).length > 1) ? 's' : null}
+          </PaneHeader>
+
+          <Comments
+            comments={term.notes || []}
+            newObjectLabel="note"
+            onCreate={handleNewNote}
+            onUpdate={handleNoteEdit}
+            onDelete={handleNoteDeletion} />
+        </div>
       </div>
     </div>
   );
@@ -329,18 +390,19 @@ export const Concept: React.FC<{ id: string }> = function ({ id }) {
 
 interface CommentsProps {
   comments: string[],
+  newObjectLabel: string,
   onCreate: (c: string) => void,
   onUpdate: (idx: number, c: string) => void,
   onDelete: (idx: number) => void,
 }
-const Comments: React.FC<CommentsProps> = function ({ comments, onCreate, onUpdate, onDelete }) {
+const Comments: React.FC<CommentsProps> = function ({ comments, newObjectLabel, onCreate, onUpdate, onDelete }) {
   const [newComment, updateNewComment] = useState('');
 
   return <div className={styles.commentList}>
     <div className={styles.comment}>
       <EditableText
         value={newComment}
-        placeholder="New comment…"
+        placeholder={`New ${newObjectLabel}…`}
         onChange={updateNewComment}
         multiline={false}
       />
@@ -354,7 +416,7 @@ const Comments: React.FC<CommentsProps> = function ({ comments, onCreate, onUpda
               fill={true}
               minimal={true}
               intent="primary">
-            Add comment
+            Add {newObjectLabel}
           </Button>
         : null}
     </div>

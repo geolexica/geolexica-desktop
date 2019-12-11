@@ -60,6 +60,15 @@ $leftPadding: 2rem;
   }
 }
 
+
+:local .conceptNotesAndComments {
+  display: flex;
+  flex-flow: row nowrap;
+
+  > * {
+    flex: 1;
+  }
+}
 :local .conceptComments {
   padding: .5rem 1rem .5rem $leftPadding;
 
