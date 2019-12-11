@@ -269,13 +269,15 @@ export const Concept: React.FC<{ id: string }> = function ({ id }) {
             value={(term.authoritative_source || {}).clause || ''} />
         </div>
 
-        <Tooltip position={Position.RIGHT_TOP} content="Open authoritative source in a new window">
-          <Button
-            minimal={true}
-            small={true}
-            intent="primary"
-            onClick={() => require('electron').shell.openExternal((term.authoritative_source || {}).link || '')}>Open…</Button>
-        </Tooltip>
+        {((term.authoritative_source || {}).link || '').trim() !== ''
+          ? <Tooltip position={Position.RIGHT_TOP} content="Open authoritative source in a new window">
+              <Button
+                minimal={true}
+                small={true}
+                intent="primary"
+                onClick={() => require('electron').shell.openExternal((term.authoritative_source || {}).link || '')}>Open…</Button>
+            </Tooltip>
+          : null}
       </div>
 
       <div className={styles.preferredStatus}>
