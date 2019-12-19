@@ -3,7 +3,9 @@
   "version": "0.0.8",
   "description": "Cross-platform graphical terminal for collaborative editing of ISO/TC 211 Geolexica terminology database",
   "main": "index.js",
-  "repository": "git@github.com:ISO-TC211/geolexica-desktop.git",
+  "repository": "git@github.com:geolexica/geolexica-desktop.git",
+  "bugs": "https://github.com/geolexica/geolexica-desktop/issues",
+  "author": "Ribose Inc. <open.source@ribose.com>",
   "license": "MIT",
   "electronWebpack": {
     "staticSourceDirectory": "src/static",
@@ -14,14 +16,78 @@
       "webpackConfig": "renderer.webpack.js"
     }
   },
-  "build": {
-    "productName": "Geolexica Desktop"
-  },
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
-    "dist": "yarn compile && electron-builder -ml",
-    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
+    "dist": "cross-env DEBUG=electron-builder electron-builder",
+    "dist:win": "electron-builder -w",
+    "dist:mac": "electron-builder -m",
+    "pack": "electron-builder --dir",
+    "release": "electron-builder --publish always",
+    "cdist": "yarn compile && electron-builder -mlw",
+    "cdist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
+  },
+  "build": {
+    "productName": "Geolexica Desktop",
+    "appId": "org.geolexica.isotc211",
+    "afterSign": "./scripts/hooks/after-sign.js",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
+      "target": "dmg",
+      "gatekeeperAssess": false,
+      "hardenedRuntime": true,
+      "entitlements": "assets/mac/entitlements.mac.inherit.plist",
+      "entitlementsInherit": "assets/mac/entitlements.mac.inherit.plist"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 440,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "artifactName": "geolexica-desktop-${version}.${ext}"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable"
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "runAfterFinish": true,
+      "installerIcon": "build/icon.ico",
+      "artifactName": "electron-gha-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "geolexica-desktop.exe"
+    },
+    "appx": {
+      "backgroundColor": "#464646",
+      "publisherDisplayName": "ituob",
+      "artifactName": "geolexica-desktop-${version}.${ext}"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "releaseType": "release"
+      }
+    ]
   },
   "devDependencies": {
     "@types/async-lock": "^1.1.1",
