@@ -41,6 +41,9 @@ $leftPadding: 2rem;
 }
 
 :local .entryStatus {
+  display: flex;
+  align-items: center;
+
   :first-child {
     margin-right: 1rem;
   }
